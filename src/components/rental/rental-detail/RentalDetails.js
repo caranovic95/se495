@@ -3,6 +3,7 @@ import { connect } from 'react-redux'
 import { RentalDetailInfo } from './RentalDetailInfo';
 import { RentalMap } from './RentalMap'
 
+
 import * as actions from 'actions'
 
 class RentalDetails extends React.Component {
