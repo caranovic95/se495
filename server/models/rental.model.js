@@ -15,7 +15,8 @@ const rentSchema = new Schema({
     color: { type: String },
     description: { type: String, max: (250) },
     dailyRate: Number,
-    createdAt: { type: Date, default: Date.now }
+    createdAt: { type: Date, default: Date.now },
+    user: [{ type: Schema.Types.ObjectId, ref: 'User' }]
 })
 
 module.exports = mongoose.model('Rental', rentSchema);
