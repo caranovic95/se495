@@ -4,7 +4,8 @@ const config = require("./config/dev")
 const Rent = require('./models/rental.model')
 const FakeDB = require('./seed');
 
-const rentalRoutes = require('./routes/rental.routes')
+const rentalRoutes = require('./routes/rental.routes'),
+    userRoutes = require('./routes/user.routes')
 
 
 
@@ -18,6 +19,7 @@ mongoose.connect(config.DB_URI, { useNewUrlParser: true, useUnifiedTopology: tru
 
 const app = express();
 app.use('/api/v1/rentals', rentalRoutes);
+app.use('/api/v1/users', userRoutes);
 
 const port = process.env.PORT || 3001;
 
