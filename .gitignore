@@ -1,0 +1,9 @@
+.env
+.nvmrc
+node_modules
+.idea
+.vscode
+dist
+.DS_Store
+.DS_Store?
+coverage
