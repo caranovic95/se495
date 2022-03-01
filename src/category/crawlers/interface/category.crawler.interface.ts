@@ -15,3 +15,9 @@ export interface CategoryMapData {
     sub_category: string[],
 }
 
+export interface BrandReturnData{
+    brand_name: string,
+    brand_url : string,
+    created_at: Date
+}
+

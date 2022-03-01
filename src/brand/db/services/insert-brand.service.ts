@@ -1,17 +1,15 @@
 import Logger from '../../../common/helpers/logger';
 import {injectTransaction} from '../../../common/helpers/inject-transaction';
 import getConfigsOfProjectsToRun from "@jest/core/build/getConfigsOfProjectsToRun";
-import {Product} from "../models/product.model";
+import {Brand} from "../models/brand.model";
 
 const logger = Logger.get('CREATE-CURRENCY');
 
-const createProduct = async (parseProductData): Promise<any> => {
+const createBrand = async (parseBrandData): Promise<any> => {
     try {
-        const resultProduct: any = Object.values(parseProductData);
-        console.log("product: ",resultProduct)
-        for (let item of resultProduct) {
-            await Product.bulkCreate(item)
-        }
+        const resultProduct: any = Object.values(parseBrandData);
+        await Brand.bulkCreate(resultProduct);
+
     } catch (e) {
         console.log(e);
         logger.error('Creation of product failed ', e);
@@ -20,4 +18,4 @@ const createProduct = async (parseProductData): Promise<any> => {
 };
 
 
-export {createProduct};
+export {createBrand};

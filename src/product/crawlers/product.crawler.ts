@@ -1,5 +1,5 @@
-import { Page } from 'puppeteer';
-import { allProductsNull } from '../../utilities/crawler.validations';
+import {Page} from 'puppeteer';
+import {allProductsNull} from '../../utilities/crawler.validations';
 import {
     mapDataProductId,
     mapDataName,
@@ -13,9 +13,11 @@ import puppeteer from 'puppeteer'
 import getCategories from "../../category/db/services/get-categories.service";
 import {createProduct} from "../db/services/insert-product.service";
 import {ProductInterface} from "./interface/product.crawler.interface";
+import {updateProduct} from "../db/services/update-active-product.service";
+import {createBrand} from "../../brand/db/services/insert-brand.service";
 
 const productListPageSelector = '.product-wrap-grid .js-ga-product-data';
-const screenshotPath='screens/category.png';
+const screenshotPath = 'screens/category.png';
 
 
 export const parseProductData = async () => {
@@ -24,39 +26,41 @@ export const parseProductData = async () => {
             headless: true
         });
         let categories = await getCategories();
-        for(let item of categories) {
+        let product: ProductInterface[];
+        let prodArr = [];
+        for (let item of categories) {
             console.log(item);
             const page = await browser.newPage();
-            await page.goto(item.sub_category, { waitUntil: 'networkidle0' });
+            await page.goto(item.sub_category, {waitUntil: 'networkidle0'});
             await page.waitForTimeout(3000);
-            await page.screenshot({path: screenshotPath,fullPage: true});
-            let product: ProductInterface[] = await parseProducts(page);
-            await page.waitForTimeout(2000);
-            await createProduct(product);
-            await page.waitForTimeout(2000);
-            console.log(product)
+            await page.screenshot({path: screenshotPath, fullPage: true});
+            product = await parseProducts(page, item.id);
+            prodArr.push(product);
+            await page.close();
         }
-
-
-
+        await updateProduct();
+        await createProduct(prodArr);
+        process.exit();
 
     } catch (e) {
         console.log(e);
         throw e;
     }
 };
-async function parseProducts(page: Page) {
+
+async function parseProducts(page: Page, category_id) {
     try {
         let id = await getId(page);
         let title = await getTitle(page);
         let price = await getPrice(page);
         let brand = await getBrand(page);
-        let quantity= await getQuantity(page);
+        let quantity = await getQuantity(page);
         let position = await getPosition(page);
         let image = await getProductImage(page);
-        const crawled_at = new Date().toJSON();
+        const crawled_at = new Date();
 
-        const mappingObj:any = {
+        const mappingObj: any = {
+            category_id,
             id,
             title,
             price,
@@ -74,13 +78,18 @@ async function parseProducts(page: Page) {
     }
 }
 
+
+
+
+
 async function mapProducts(mappingObj): Promise<any[]> {
     try {
         let productArr: any[] = [];
         let elementsLength = mappingObj.id.length;
-
         for (let i = 0; i < elementsLength; i++) {
+
             productArr.push({
+                category_id: mappingObj.category_id,
                 product_id: mappingObj.id[i],
                 title: mappingObj.title[i],
                 price: mappingObj.price[i],
@@ -88,7 +97,8 @@ async function mapProducts(mappingObj): Promise<any[]> {
                 quantity: mappingObj.quantity[i],
                 position: mappingObj.position[i],
                 image: mappingObj.image[i],
-                crawled_at: mappingObj.crawled_at
+                crawled_at: mappingObj.crawled_at,
+                active: 1
             });
         }
         return productArr;
@@ -99,14 +109,14 @@ async function mapProducts(mappingObj): Promise<any[]> {
 
 
 async function getId(page: Page) {
-    try{
-        const ids= await page.$$eval(productListPageSelector, mapDataProductId);
+    try {
+        const ids = await page.$$eval(productListPageSelector, mapDataProductId);
         return ids;
-    }
-    catch (e){
+    } catch (e) {
         return [];
     }
 }
+
 async function getTitle(page: Page) {
     try {
         const title = await page.$$eval(productListPageSelector, mapDataName);
@@ -125,10 +135,13 @@ async function getPrice(page: Page) {
         return [];
     }
 }
+
 async function getBrand(page: Page) {
     try {
         const brand = await page.$$eval(productListPageSelector, mapDataBrand);
-        return brand;
+        let uniq = [...new Set(brand)];
+
+        return uniq;
     } catch (e) {
         return [];
     }
@@ -155,16 +168,13 @@ async function getPosition(page: Page) {
 }
 
 async function getProductImage(page: Page) {
-    try{
-        const image = await page.$$eval('.product-img-wrap-grid .images-wrapper img,.product-img-wrap-grid [data-image-info="main-image"]',mapImgSrc);
+    try {
+        const image = await page.$$eval('.product-img-wrap-grid .images-wrapper img,.product-img-wrap-grid [data-image-info="main-image"]', mapImgSrc);
         return image;
-    }catch (e){
-        return[];
+    } catch (e) {
+        return [];
     }
 }
-
-
-
 
 
 module.exports.getProductData = parseProductData;

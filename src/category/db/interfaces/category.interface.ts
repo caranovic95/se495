@@ -1,5 +1,6 @@
 
 export interface CategoryDBInterface {
+    readonly id: number,
     shopname: string,
     category_url: string,
     screenshot?: any,

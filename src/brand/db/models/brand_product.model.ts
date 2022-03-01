@@ -7,18 +7,18 @@ import {
     Column,
     DataType, Unique,
 } from 'sequelize-typescript';
-import {ProductDBInterface} from '../interfaces/product.interface';
+import {BrandDBInterface, BrandProductDBInterface} from "../interfaces/brand.interface";
 
 @Table({
     name: {
-        singular: 'product',
-        plural: 'products',
+        singular: 'brand_product',
+        plural: 'brand_products',
     },
-    tableName: 'product',
+    tableName: 'brand_product',
     timestamps: false,
     underscored: true,
 })
-export class Product extends Model<Partial<ProductDBInterface>> {
+export class BrandProduct extends Model<Partial<BrandProductDBInterface>> {
     @PrimaryKey
     @AutoIncrement
     @AllowNull(false)
@@ -26,12 +26,8 @@ export class Product extends Model<Partial<ProductDBInterface>> {
     readonly id: number;
 
     @AllowNull(true)
-    @Column(DataType.STRING)
-    category_id: number;
-
-    @AllowNull(true)
-    @Column(DataType.STRING)
-    product_id: string;
+    @Column(DataType.FLOAT)
+    product_id: number;
 
     @AllowNull(true)
     @Column(DataType.STRING)
@@ -39,15 +35,19 @@ export class Product extends Model<Partial<ProductDBInterface>> {
 
     @AllowNull(true)
     @Column(DataType.FLOAT)
+    availability: number;
+
+    @AllowNull(true)
+    @Column(DataType.FLOAT)
     price: number;
 
     @AllowNull(true)
     @Column(DataType.STRING)
-    brand: string;
+    description: string;
 
     @AllowNull(true)
     @Column(DataType.INTEGER)
-    quantity: number;
+    delivery: number;
 
     @AllowNull(true)
     @Column(DataType.INTEGER)
@@ -67,8 +67,8 @@ export class Product extends Model<Partial<ProductDBInterface>> {
 
 
     static loadScopes = async (): Promise<void> => {
-        await Product.addScope('public', {
-            attributes: ['product_id', 'title', 'price', 'brand', 'quantity', 'position', 'image', 'crawled_at', 'active']
+        await BrandProduct.addScope('public', {
+            attributes: ['title', 'availability', 'price','description','delivery','position','image','crawled_at']
         });
     }
 }

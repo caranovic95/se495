@@ -1,20 +1,20 @@
 import Logger from '../../../common/helpers/logger';
-import {Category} from "../models/category.model";
+import {Brand} from "../models/brand.model";
 
-const logger = Logger.get('GET-ALL-CATEGORIES');
+const logger = Logger.get('GET-ALL-BRANDS');
 
-const getCategories = async ()=> {
+const getBrands = async ()=> {
     try {
-        const categories = await Category.findAll({raw : true ,
+        const brands = await Brand.findAll({raw : true ,
             nest: true , // <--- The issue of raw true, will be solved by this
             include: [{
                 all: true
             }],
         })
-        return categories;
+        return brands;
     } catch (e) {
         throw new Error(e.message);
     }
 };
 
-export default getCategories;
+export default getBrands;

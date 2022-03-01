@@ -2,17 +2,18 @@ import { Page } from 'puppeteer';
 import {
     mapHrefs,
     getElementsLength,
-    formatUrl
+    formatUrl, mapDataBrand
 } from '../../utilities/crawler.formating';
 import puppeteer from 'puppeteer'
 import config from "../../common/helpers/config";
-import {CategoryMapData, CategoryReturnData} from "./interface/category.crawler.interface";
+import {BrandReturnData, CategoryMapData, CategoryReturnData} from "./interface/category.crawler.interface";
+import {createCategory} from "../db/services/insert-category.service";
+import {createBrand} from "../../brand/db/services/insert-brand.service";
 
 const productSubCategory = '.category-menu-wrap .submenu-category-item ul li a';
 const category_url=config.get('LINK');
 const screenshotPath='screens/category.png';
-
-
+const brandSelector= '.header-links a:nth-child(5),.header-links a:nth-child(6),.header-links a:nth-child(7)';
 export const parseCategoryData = async () => {
     try {
         const browser = await puppeteer.launch({
@@ -22,9 +23,15 @@ export const parseCategoryData = async () => {
         await page.goto(category_url, { waitUntil: 'networkidle0' });
         await page.screenshot({path: screenshotPath,fullPage: true});
         const category: CategoryReturnData[] = await parseCategories(page);
-       // await createCategory(category);
-        console.log(category)
+        const brand: BrandReturnData[] = await parseBrand(page);
+        await page.waitForTimeout(5000)
+        await page.close();
+        await page.waitForTimeout(5000)
+        await createCategory(category);
+        await createBrand(brand);
+        await page.waitForTimeout(5000)
         return category;
+
 
     } catch (e) {
         console.log(e);
@@ -37,21 +44,69 @@ export const parseCategoryData = async () => {
 async function getSubCategories(page: Page) {
     try {
         let urlCategoryLinks:string[] = await page.$$eval(productSubCategory, mapHrefs);
-        if (urlCategoryLinks && urlCategoryLinks.length) {
-           urlCategoryLinks.map((item)=> formatUrl(item)).filter((item)=> item.includes(''||'/pages/celebrity-store-andjelka-prpic'));
-
-        }
-        const uniqLinks = [...new Set(urlCategoryLinks)];
-        return uniqLinks;
+        urlCategoryLinks =  urlCategoryLinks.filter(e =>  e);
+        console.log("MAP HREFOVI: ",urlCategoryLinks.length)
+        return urlCategoryLinks
     } catch (error) {
         console.log(error);
         return [];
     }
 }
 
+async function parseBrand(page: Page) {
+    let brandName = await getBrandName(page);
+    let brand = await getBrand(page);
+    const created_at = new Date();
+    const mappingObj: any = {
+        brandName,
+        brand,
+        created_at
+    };
+    console.log(mappingObj);
+    const brands: BrandReturnData[] = await mapBrands(mappingObj);
+    return brands;
+
+}
+async function mapBrands(mappingObj): Promise<any[]> {
+    let brandArr: any[] = [];
+    console.log("MAPPING OBJ : ",mappingObj);
+    for (let i = 0;i<mappingObj.brand.length; i++) {
+
+        brandArr.push({
+            brand_name: mappingObj.brandName[i],
+            brand_url :mappingObj.brand[i],
+            created_at: mappingObj.created_at
+        });
+    }
+    return brandArr;
+
+}
+
+async function getBrand(page: Page) {
+    try {
+        const brand = await page.$$eval(brandSelector, mapHrefs);
+
+        return brand;
+    } catch (e) {
+        console.log(e);
+        return [];
+    }
+}
+async function getBrandName(page: Page) {
+    try {
+        let brand = await page.$$eval(brandSelector, mapHrefs);
+        let brandArr=[];
+        brand = brand.map((item) => item.split('/').pop());
+        console.log("BRAND: ",brand);
+        return brand;
+    } catch (e) {
+        console.log(e);
+        return [];
+    }
+}
+
 async function parseCategories(page: Page) {
     try {
-        const elementsLength = await page.$$eval(productSubCategory, getElementsLength);
         const shop_name = extractShopName(category_url);
         let categoryLinks = await getSubCategories(page);
         const crawled_at = new Date().toJSON();
@@ -64,18 +119,18 @@ async function parseCategories(page: Page) {
             screenshot: screenshotPath,
             sub_category: categoryLinks
         };
-        const categories: CategoryReturnData[] = await mapCategory(mappingObj,elementsLength);
+        const categories: CategoryReturnData[] = await mapCategory(mappingObj);
         return categories;
     } catch (e) {
-       return [];
+        return [];
     }
 }
 
-async function mapCategory(mappingObj,elementsLength): Promise<CategoryReturnData[]> {
+async function mapCategory(mappingObj): Promise<CategoryReturnData[]> {
     try {
         let categoryArr: CategoryReturnData[] = [];
-
-        for (let i = 0; i < elementsLength; i++) {
+        const elemLength =mappingObj.sub_category.length;
+        for (let i = 0; i < elemLength; i++) {
             categoryArr.push({
                 shop_name: mappingObj.shop_name,
                 category_url: category_url,

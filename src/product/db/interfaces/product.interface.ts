@@ -1,4 +1,5 @@
 export interface ProductDBInterface {
+    readonly id: number,
     product_id: number,
     title: string
     price: number,
@@ -7,4 +8,5 @@ export interface ProductDBInterface {
     position: number,
     image: string,
     crawled_at: string,
+    active: number,
 }

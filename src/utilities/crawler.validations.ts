@@ -14,12 +14,3 @@ export const allProductsNull = (listProducts: any[]): void => {
         throw 'All pzns are null';
 };
 
-export const addZeroToPzn = (arrayOfElements: any[]): any[] => {
-    for (let item in arrayOfElements) {
-        if (arrayOfElements[item].length === 7) {
-            arrayOfElements[item] = 0 + arrayOfElements[item];
-        }
-    }
-
-    return arrayOfElements;
-};

@@ -5,7 +5,7 @@ import {
     AutoIncrement,
     AllowNull,
     Column,
-    DataType, Unique,
+    DataType, Unique, Default,
 } from 'sequelize-typescript';
 import { CategoryDBInterface } from '../interfaces/category.interface';
 
@@ -30,6 +30,7 @@ export class Category extends Model<Partial<CategoryDBInterface>> {
     shop_name: string;
 
     @AllowNull(true)
+    @Default(null)
     @Column(DataType.STRING)
     category_url: string;
 
@@ -43,6 +44,7 @@ export class Category extends Model<Partial<CategoryDBInterface>> {
 
     @AllowNull(true)
     @Unique(true)
+    @Default(null)
     @Column(DataType.STRING)
     sub_category: string;
 
