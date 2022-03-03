@@ -2,6 +2,7 @@ import qs from 'qs';
 import config from '../helpers/config';
 import Logger from '../helpers/logger';
 import * as errors from '../helpers/errors';
+import { loginUser} from "../../user/services/login-user.service";
 
 const logger = Logger.get('SYSTEM');
 
@@ -88,16 +89,20 @@ const _scatter = (output: {
     data: any;
 }): { body: string; headers: { 'Content-Type': 'application/json' } } => {
     let response = null;
+
     if (output && output.contentType && output.data) {
         response = {
-            body: output.data.buffer,
+            cookie: output.data.cookie,
             headers: { 'Content-Type': output.contentType },
         };
-    } else {
+        console.log(response);
+    }
+    else {
         response = {
             body: output,
             headers: { 'Content-Type': 'application/json' },
         };
+        console.log(response);
     }
     return response;
 };
@@ -116,6 +121,7 @@ const lift = (
                 req.originalUrl + (req.query ? qs.stringify(req.query) : '') + (req.body ? qs.stringify(req.body) : '');
             const output = await method(input);
             const { body, headers } = (scatter || _scatter)(output);
+
             res.locals.content = body;
             res.locals.code = _code(method, output);
             res.locals.headers = Object.assign(_headers(method, output), headers);

@@ -23,7 +23,8 @@ const screenshotPath = 'screens/category.png';
 export const parseProductData = async () => {
     try {
         const browser = await puppeteer.launch({
-            headless: true
+            devtools:false,
+            headless: (process.platform !== "win32")
         });
         let categories = await getCategories();
         let product: ProductInterface[];
@@ -31,13 +32,17 @@ export const parseProductData = async () => {
         for (let item of categories) {
             console.log(item);
             const page = await browser.newPage();
-            await page.goto(item.sub_category, {waitUntil: 'networkidle0'});
+            await page.setDefaultNavigationTimeout(0);
+
+            await page.goto(item.sub_category, {waitUntil: ["domcontentloaded","networkidle2"]});
             await page.waitForTimeout(3000);
             await page.screenshot({path: screenshotPath, fullPage: true});
             product = await parseProducts(page, item.id);
+            console.log(product)
             prodArr.push(product);
             await page.close();
         }
+        //let getAllProducts=
         await updateProduct();
         await createProduct(prodArr);
         process.exit();
@@ -139,9 +144,8 @@ async function getPrice(page: Page) {
 async function getBrand(page: Page) {
     try {
         const brand = await page.$$eval(productListPageSelector, mapDataBrand);
-        let uniq = [...new Set(brand)];
 
-        return uniq;
+        return brand;
     } catch (e) {
         return [];
     }

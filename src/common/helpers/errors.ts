@@ -27,6 +27,11 @@ export class NotFoundError extends BaseError {
         super();
     }
 }
+export class InvalidCredentials extends BaseError {
+    constructor (public message = 'INVALID_CREDENTIALS', public status = 404) {
+        super();
+    }
+}
 
 export class UnauthorizedError extends BaseError {
     constructor (public message = 'UNKNOWN_ACCESSOR', public status = 401) {

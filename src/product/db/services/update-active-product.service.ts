@@ -12,11 +12,17 @@ const updateProduct = async ()=> {
             },
             order: [ [ 'crawled_at', 'DESC' ]]
         })
-        let nowDate = new Date();
-        if(products_date[0].crawled_at<nowDate){
-           await Product.update({ active : 0 },{ where : {  }});
+        if(products_date.length && products_date.length>0){
+            let nowDate = new Date();
+            console.log("NOW DATE: ",nowDate);
+            console.log("CRAWLED AT: ",products_date[0].crawled_at);
+            if(products_date[0].crawled_at<nowDate){
+                await Product.update({ active : 0 },{ where : {  }});
+            }
+            return products_date;
         }
-        return products_date;
+        else return [];
+
     } catch (e) {
         console.log(e)
         throw new Error(e.message);
