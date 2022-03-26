@@ -1,10 +1,13 @@
-import { Category } from '../../category/db/models/category.model';
-import { Product } from '../../product/db/models/product.model';
-import {Brand} from "../../brand/db/models/brand.model";
-import  {User} from "../../user/models/user.model"
+import {Category} from '../../category/db/models/category.model';
+import {Product} from '../../product/db/models/product.model';
+import {User} from "../../user/models/user.model"
+import {Keyword} from "../../keyword/db/models/keyword.model";
+import {KeywordProduct} from "../../keyword/db/models/keyword_product.model";
+
 export {
     Category,
     Product,
-    Brand,
-    User
+    User,
+    Keyword,
+    KeywordProduct
 };

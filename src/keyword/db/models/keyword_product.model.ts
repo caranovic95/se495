@@ -7,18 +7,18 @@ import {
     Column,
     DataType, Unique,
 } from 'sequelize-typescript';
-import {BrandDBInterface, BrandProductDBInterface} from "../interfaces/brand.interface";
+import {KeywordProductDBInterface} from '../interfaces/keyword.interface';
 
 @Table({
     name: {
-        singular: 'brand_product',
-        plural: 'brand_products',
+        singular: 'keyword_product',
+        plural: 'keyword_products',
     },
-    tableName: 'brand_product',
+    tableName: 'keyword_product',
     timestamps: false,
     underscored: true,
 })
-export class BrandProduct extends Model<Partial<BrandProductDBInterface>> {
+export class KeywordProduct extends Model<Partial<KeywordProductDBInterface>> {
     @PrimaryKey
     @AutoIncrement
     @AllowNull(false)
@@ -26,16 +26,12 @@ export class BrandProduct extends Model<Partial<BrandProductDBInterface>> {
     readonly id: number;
 
     @AllowNull(true)
-    @Column(DataType.FLOAT)
-    product_id: number;
+    @Column(DataType.STRING)
+    keyword_id: number;
 
     @AllowNull(true)
     @Column(DataType.STRING)
-    title: string;
-
-    @AllowNull(true)
-    @Column(DataType.FLOAT)
-    availability: number;
+    product_name: string;
 
     @AllowNull(true)
     @Column(DataType.FLOAT)
@@ -43,11 +39,19 @@ export class BrandProduct extends Model<Partial<BrandProductDBInterface>> {
 
     @AllowNull(true)
     @Column(DataType.STRING)
-    description: string;
+    product_desc: string;
+
+    @AllowNull(true)
+    @Column(DataType.STRING)
+    brand: string;
 
     @AllowNull(true)
     @Column(DataType.INTEGER)
-    delivery: number;
+    quantity: number;
+
+    @AllowNull(true)
+    @Column(DataType.STRING)
+    availability: string;
 
     @AllowNull(true)
     @Column(DataType.INTEGER)
@@ -67,8 +71,8 @@ export class BrandProduct extends Model<Partial<BrandProductDBInterface>> {
 
 
     static loadScopes = async (): Promise<void> => {
-        await BrandProduct.addScope('public', {
-            attributes: ['title', 'availability', 'price','description','delivery','position','image','crawled_at']
+        await KeywordProduct.addScope('public', {
+            attributes: ['keyword_id', 'product_name', 'price', 'product_desc', 'brand', 'quantity', 'availability', 'position', 'image', 'crawled_at', 'active']
         });
     }
 }

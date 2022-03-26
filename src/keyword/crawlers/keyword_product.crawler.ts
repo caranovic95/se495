@@ -7,43 +7,49 @@ import {
     mapDataBrand,
     mapDataQuantity,
     mapDataPosition,
-    mapImgSrc, formatPrice
+    mapImgSrc, formatPrice, mapTextContent, getElementsLength
 } from '../../utilities/crawler.formating';
 import puppeteer from 'puppeteer'
 import getCategories from "../../category/db/services/get-categories.service";
-import {createProduct} from "../db/services/insert-product.service";
-import {ProductInterface} from "./interface/product.crawler.interface";
-import {updateProduct} from "../db/services/update-active-product.service";
+import config from "../../common/helpers/config";
+import getKeywords from "../db/services/get-keywords.service";
+import {ProductInterface} from "../../product/crawlers/interface/product.crawler.interface";
+import {createKeywordProduct} from "../db/services/insert-product_keywords.service";
+import {updateKeywordProduct} from "../db/services/update-active-product_keyword.service";
+
 
 const productListPageSelector = '.product-wrap-grid .js-ga-product-data';
 const screenshotPath = 'screens/category.png';
+const brandLinkSelectors = '.header-links a:nth-child(5), .header-links a:nth-child(6)';
+const url = config.get('KEYWORDS_LINK');
 
 
-export const parseProductData = async () => {
+export const parseProductKeywordData = async () => {
     try {
         const browser = await puppeteer.launch({
-            devtools:false,
-            headless:false
+            headless: false
         });
-        let categories = await getCategories();
-        let product: ProductInterface[];
-        let prodArr = [];
-        for (let item of categories) {
-            console.log(item);
+        let keywords = await getKeywords();
+        let keyword = [];
+        let keywordArr = [];
+        let brandArr = [];
+        for (let item of keywords) {
+
             const page = await browser.newPage();
             await page.setDefaultNavigationTimeout(0);
-
-            await page.goto(item.sub_category, {waitUntil: ["domcontentloaded","networkidle2"]});
+            await page.goto(url + item.keyword, {waitUntil: ["domcontentloaded", "networkidle2"]});
             await page.waitForTimeout(3000);
             await page.screenshot({path: screenshotPath, fullPage: true});
-            product = await parseProducts(page, item.id);
-            console.log(product)
-            prodArr.push(product);
+            keyword = await parseKeywordsProduct(page, item.id);
+            //iscitaj keyworde, pozovi bukvalno istu f-ju za parsiranje produkta
+            // napravi na frontu da mozes dodavati keyworde i napravi funkciju za insertovanje keyworda.
+
+            keywordArr.push(keyword);
             await page.close();
+
         }
-        //let getAllProducts=
-        await updateProduct();
-        await createProduct(prodArr);
+        await updateKeywordProduct();
+        await createKeywordProduct(keywordArr);
         process.exit();
 
     } catch (e) {
@@ -52,29 +58,34 @@ export const parseProductData = async () => {
     }
 };
 
-async function parseProducts(page: Page, category_id) {
+
+async function parseKeywordsProduct(page: Page, keyword_id) {
     try {
         let id = await getId(page);
-        let title = await getTitle(page);
+        let product_name = await getTitle(page);
         let price = await getPrice(page);
+        let product_desc = await getDesc(page);
         let brand = await getBrand(page);
         let quantity = await getQuantity(page);
+        let availability = await getAvailability(page);
         let position = await getPosition(page);
         let image = await getProductImage(page);
         const crawled_at = new Date();
 
         const mappingObj: any = {
-            category_id,
+            keyword_id,
             id,
-            title,
+            product_name,
             price,
+            product_desc,
             brand,
             quantity,
+            availability,
             position,
             image,
             crawled_at
         };
-        const products: ProductInterface[] = await mapProducts(mappingObj);
+        const products: ProductInterface[] = await mapKeywordsProduct(mappingObj);
         return products;
 
     } catch (e) {
@@ -82,23 +93,20 @@ async function parseProducts(page: Page, category_id) {
     }
 }
 
-
-
-
-
-async function mapProducts(mappingObj): Promise<any[]> {
+async function mapKeywordsProduct(mappingObj): Promise<any[]> {
     try {
         let productArr: any[] = [];
         let elementsLength = mappingObj.id.length;
         for (let i = 0; i < elementsLength; i++) {
 
             productArr.push({
-                category_id: mappingObj.category_id,
-                product_id: mappingObj.id[i],
-                title: mappingObj.title[i],
+                keyword_id: mappingObj.keyword_id,
+                product_name: mappingObj.product_name[i],
                 price: mappingObj.price[i],
+                product_desc: mappingObj.product_desc[i],
                 brand: mappingObj.brand[i],
                 quantity: mappingObj.quantity[i],
+                availability: mappingObj.availability[i],
                 position: mappingObj.position[i],
                 image: mappingObj.image[i],
                 crawled_at: mappingObj.crawled_at,
@@ -111,11 +119,19 @@ async function mapProducts(mappingObj): Promise<any[]> {
     }
 }
 
-
 async function getId(page: Page) {
     try {
         const ids = await page.$$eval(productListPageSelector, mapDataProductId);
         return ids;
+    } catch (e) {
+        return [];
+    }
+}
+
+async function getDesc(page: Page) {
+    try {
+        const desc = await page.$$eval('.product-description-grid', mapTextContent);
+        return desc;
     } catch (e) {
         return [];
     }
@@ -144,6 +160,7 @@ async function getBrand(page: Page) {
     try {
         const brand = await page.$$eval(productListPageSelector, mapDataBrand);
 
+
         return brand;
     } catch (e) {
         return [];
@@ -157,6 +174,14 @@ async function getQuantity(page: Page) {
         return quantity;
     } catch (e) {
         return [];
+    }
+}
+
+async function getAvailability(page: Page): Promise<number> {
+    try {
+        return await page.$$eval('.product-on-stock', mapTextContent);
+    } catch (e) {
+        return null;
     }
 }
 
@@ -180,4 +205,4 @@ async function getProductImage(page: Page) {
 }
 
 
-module.exports.getProductData = parseProductData;
+module.exports.getProductData = parseProductKeywordData;

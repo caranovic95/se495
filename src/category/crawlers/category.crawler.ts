@@ -8,12 +8,12 @@ import puppeteer from 'puppeteer'
 import config from "../../common/helpers/config";
 import {BrandReturnData, CategoryMapData, CategoryReturnData} from "./interface/category.crawler.interface";
 import {createCategory} from "../db/services/insert-category.service";
-import {createBrand} from "../../brand/db/services/insert-brand.service";
 
 const productSubCategory = '.category-menu-wrap .submenu-category-item ul li a';
 const category_url=config.get('LINK');
 const screenshotPath='screens/category.png';
 const brandSelector= '.header-links a:nth-child(5),.header-links a:nth-child(6),.header-links a:nth-child(7)';
+
 export const parseCategoryData = async () => {
     try {
         const browser = await puppeteer.launch({
@@ -28,7 +28,6 @@ export const parseCategoryData = async () => {
         await page.close();
         await page.waitForTimeout(5000)
         await createCategory(category);
-        await createBrand(brand);
         await page.waitForTimeout(5000)
         return category;
 

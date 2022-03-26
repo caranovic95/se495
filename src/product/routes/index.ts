@@ -7,6 +7,7 @@ import getProductByMonths from  "../db/services/get-product-months.service";
 import deleteProduct from "../db/services/delete-product.service";
 import getProductById from "../db/services/get-product.service";
 import {updateProduct} from "../db/services/update-product.service";
+import {verifyToken} from "../../common/middlewares/auth";
 
 const router = express.Router();
 
@@ -14,26 +15,26 @@ const router = express.Router();
 
 router
     .route('/product')
-    .post(lift(parseProductData),respond);
+    .post(verifyToken,lift(parseProductData),respond);
 
 router
     .route('/product')
-    .get(lift(getAllProducts),respond);
+    .get(verifyToken,lift(getAllProducts),respond);
 
 router
     .route('/product/:id')
-    .get(lift(getProductById),respond);
+    .get(verifyToken,lift(getProductById),respond);
 
 router
     .route('/product/:id')
-    .put(lift(updateProduct),respond);
+    .put(verifyToken,lift(updateProduct),respond);
 
 router
     .route('/products/:product_id')
-    .get(lift(getProductByMonths),respond);
+    .get(verifyToken,lift(getProductByMonths),respond);
 
 router
     .route('/product/:id')
-    .delete(lift(deleteProduct),respond);
+    .delete(verifyToken,lift(deleteProduct),respond);
 
 export default router;

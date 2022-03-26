@@ -78,5 +78,7 @@ export const mapImgSrc = (element) => {
 export const mapHrefs = (element) => {
     return element.map((option) => option.href);
 }
-
+export const mapTextContent = (element) => {
+    return element.map((option) => option.textContent.trim());
+};
 

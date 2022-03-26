@@ -29,7 +29,7 @@ const _validateEmail = async (email: string): Promise<any> => {
     }
 };
 
-const loginUser = async (input: { email: string; password: string }): Promise<any> => {
+const loginUser = async (input): Promise<any> => {
     try {
 
         let authenticateUser = await _validateEmail(input.email);
@@ -39,12 +39,11 @@ const loginUser = async (input: { email: string; password: string }): Promise<an
         }
 
         const token = sign({id: authenticateUser.id}, process.env.SECRET_KEY);
-
         const payload = verify(token,process.env.SECRET_KEY)
 
 
         let user= await User.scope('public').findByPk(payload['id']);
-
+        console.log(user);
         return {
             user,
             token
@@ -55,9 +54,17 @@ const loginUser = async (input: { email: string; password: string }): Promise<an
         throw e;
     }
 };
-export const AuthenticatedUser = async (req: Request, res: Response) => {
-    const {password, ...user} = req['User'];
+export const AuthenticatedUser = async (input) => {
+    try{
 
-    return user;
+        let token = input.authorization;
+        token = token.split('Bearer ')[1];
+        const payload = verify(token,process.env.SECRET_KEY)
+        let user= await User.scope('public').findByPk(payload['id']);
+        return user;
+    }catch(e){
+        console.log(e)
+    }
+
 }
 export {loginUser};

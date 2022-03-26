@@ -95,14 +95,12 @@ const _scatter = (output: {
             cookie: output.data.cookie,
             headers: { 'Content-Type': output.contentType },
         };
-        console.log(response);
     }
     else {
         response = {
             body: output,
             headers: { 'Content-Type': 'application/json' },
         };
-        console.log(response);
     }
     return response;
 };

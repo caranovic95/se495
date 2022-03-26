@@ -1,5 +1,5 @@
 import Logger from '../../../common/helpers/logger';
-import { Product } from '../models/product.model';
+import {Product} from '../models/product.model';
 import sequelize from "sequelize";
 
 const logger = Logger.get('GET-CATEGORY');
@@ -9,8 +9,8 @@ const getProductByMonths = async (input: {
 }): Promise<Product | any> => {
     try {
         const productByMonth = await Product.findAll({
-            where:{
-                product_id : input.product_id
+            where: {
+                product_id: input.product_id
             },
             attributes: [
                 'id',
@@ -18,7 +18,8 @@ const getProductByMonths = async (input: {
                 'price',
                 'position',
                 [sequelize.fn('date_format', sequelize.col('crawled_at'), '%Y-%m-%d'), 'date_col_formed']
-            ]
+            ],
+            group: [sequelize.fn('date_format', sequelize.col('crawled_at'), '%Y-%m-%d'), 'date_col_formed']
         });
         return productByMonth;
     } catch (e) {
