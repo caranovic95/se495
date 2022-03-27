@@ -5,6 +5,7 @@ import lift from "../../common/middlewares/lift";
 import getCategories from '../../category/db/services/get-categories.service'
 import getCategoryById from "../db/services/get-category.service";
 import {verifyToken} from "../../common/middlewares/auth";
+import getCategoriesPage from "../db/services/get-categories-per-page.service";
 
 
 const router = express.Router();
@@ -18,6 +19,9 @@ router
 router
     .route('/categories')
     .get(verifyToken, lift(getCategories), respond);
+router
+    .route('/categories_page')
+    .get(verifyToken, lift(getCategoriesPage), respond);
 router
     .route('/category/:id')
     .get(verifyToken, lift(getCategoryById), respond);

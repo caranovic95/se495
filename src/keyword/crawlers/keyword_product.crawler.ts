@@ -32,7 +32,6 @@ export const parseProductKeywordData = async () => {
         let keywords = await getKeywords();
         let keyword = [];
         let keywordArr = [];
-        let brandArr = [];
         for (let item of keywords) {
 
             const page = await browser.newPage();
@@ -41,13 +40,11 @@ export const parseProductKeywordData = async () => {
             await page.waitForTimeout(3000);
             await page.screenshot({path: screenshotPath, fullPage: true});
             keyword = await parseKeywordsProduct(page, item.id);
-            //iscitaj keyworde, pozovi bukvalno istu f-ju za parsiranje produkta
-            // napravi na frontu da mozes dodavati keyworde i napravi funkciju za insertovanje keyworda.
-
             keywordArr.push(keyword);
             await page.close();
 
         }
+        console.log(keywordArr);
         await updateKeywordProduct();
         await createKeywordProduct(keywordArr);
         process.exit();
@@ -61,7 +58,7 @@ export const parseProductKeywordData = async () => {
 
 async function parseKeywordsProduct(page: Page, keyword_id) {
     try {
-        let id = await getId(page);
+        let product_id = await getProductId(page);
         let product_name = await getTitle(page);
         let price = await getPrice(page);
         let product_desc = await getDesc(page);
@@ -73,8 +70,8 @@ async function parseKeywordsProduct(page: Page, keyword_id) {
         const crawled_at = new Date();
 
         const mappingObj: any = {
+            product_id,
             keyword_id,
-            id,
             product_name,
             price,
             product_desc,
@@ -85,7 +82,7 @@ async function parseKeywordsProduct(page: Page, keyword_id) {
             image,
             crawled_at
         };
-        const products: ProductInterface[] = await mapKeywordsProduct(mappingObj);
+        const products: any[] = await mapKeywordsProduct(mappingObj);
         return products;
 
     } catch (e) {
@@ -95,11 +92,13 @@ async function parseKeywordsProduct(page: Page, keyword_id) {
 
 async function mapKeywordsProduct(mappingObj): Promise<any[]> {
     try {
+
         let productArr: any[] = [];
-        let elementsLength = mappingObj.id.length;
+        let elementsLength = mappingObj.product_id.length;
         for (let i = 0; i < elementsLength; i++) {
 
             productArr.push({
+                product_id: mappingObj.product_id[i],
                 keyword_id: mappingObj.keyword_id,
                 product_name: mappingObj.product_name[i],
                 price: mappingObj.price[i],
@@ -113,13 +112,14 @@ async function mapKeywordsProduct(mappingObj): Promise<any[]> {
                 active: 1
             });
         }
+        console.log(productArr);
         return productArr;
     } catch (e) {
         throw e;
     }
 }
 
-async function getId(page: Page) {
+async function getProductId(page: Page) {
     try {
         const ids = await page.$$eval(productListPageSelector, mapDataProductId);
         return ids;

@@ -27,6 +27,10 @@ export class KeywordProduct extends Model<Partial<KeywordProductDBInterface>> {
 
     @AllowNull(true)
     @Column(DataType.STRING)
+    product_id: number;
+
+    @AllowNull(true)
+    @Column(DataType.STRING)
     keyword_id: number;
 
     @AllowNull(true)
@@ -72,7 +76,7 @@ export class KeywordProduct extends Model<Partial<KeywordProductDBInterface>> {
 
     static loadScopes = async (): Promise<void> => {
         await KeywordProduct.addScope('public', {
-            attributes: ['keyword_id', 'product_name', 'price', 'product_desc', 'brand', 'quantity', 'availability', 'position', 'image', 'crawled_at', 'active']
+            attributes: ['product_name', 'price', 'product_desc', 'brand', 'quantity', 'availability', 'position', 'image', 'crawled_at', 'active']
         });
     }
 }

@@ -39,10 +39,11 @@ const loginUser = async (input): Promise<any> => {
         }
 
         const token = sign({id: authenticateUser.id}, process.env.SECRET_KEY);
-        const payload = verify(token,process.env.SECRET_KEY)
+        console.log(token)
+        const payload = verify(token, process.env.SECRET_KEY)
 
 
-        let user= await User.scope('public').findByPk(payload['id']);
+        let user = await User.scope('public').findByPk(payload['id']);
         console.log(user);
         return {
             user,
@@ -55,14 +56,14 @@ const loginUser = async (input): Promise<any> => {
     }
 };
 export const AuthenticatedUser = async (input) => {
-    try{
+    try {
 
         let token = input.authorization;
         token = token.split('Bearer ')[1];
-        const payload = verify(token,process.env.SECRET_KEY)
-        let user= await User.scope('public').findByPk(payload['id']);
+        const payload = verify(token, process.env.SECRET_KEY)
+        let user = await User.scope('public').findByPk(payload['id']);
         return user;
-    }catch(e){
+    } catch (e) {
         console.log(e)
     }
 

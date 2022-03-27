@@ -12,25 +12,23 @@ import {createCategory} from "../db/services/insert-category.service";
 const productSubCategory = '.category-menu-wrap .submenu-category-item ul li a';
 const category_url=config.get('LINK');
 const screenshotPath='screens/category.png';
-const brandSelector= '.header-links a:nth-child(5),.header-links a:nth-child(6),.header-links a:nth-child(7)';
 
 export const parseCategoryData = async () => {
     try {
         const browser = await puppeteer.launch({
-            headless: true,
+            headless: false,
         });
         const page = await browser.newPage();
         await page.goto(category_url, { waitUntil: 'networkidle0' });
         await page.screenshot({path: screenshotPath,fullPage: true});
         const category: CategoryReturnData[] = await parseCategories(page);
-        const brand: BrandReturnData[] = await parseBrand(page);
         await page.waitForTimeout(5000)
         await page.close();
         await page.waitForTimeout(5000)
         await createCategory(category);
         await page.waitForTimeout(5000)
         return category;
-
+ 
 
     } catch (e) {
         console.log(e);
@@ -52,57 +50,8 @@ async function getSubCategories(page: Page) {
     }
 }
 
-async function parseBrand(page: Page) {
-    let brandName = await getBrandName(page);
-    let brand = await getBrand(page);
-    const created_at = new Date();
-    const mappingObj: any = {
-        brandName,
-        brand,
-        created_at
-    };
-    console.log(mappingObj);
-    const brands: BrandReturnData[] = await mapBrands(mappingObj);
-    return brands;
 
-}
-async function mapBrands(mappingObj): Promise<any[]> {
-    let brandArr: any[] = [];
-    console.log("MAPPING OBJ : ",mappingObj);
-    for (let i = 0;i<mappingObj.brand.length; i++) {
 
-        brandArr.push({
-            brand_name: mappingObj.brandName[i],
-            brand_url :mappingObj.brand[i],
-            created_at: mappingObj.created_at
-        });
-    }
-    return brandArr;
-
-}
-
-async function getBrand(page: Page) {
-    try {
-        const brand = await page.$$eval(brandSelector, mapHrefs);
-
-        return brand;
-    } catch (e) {
-        console.log(e);
-        return [];
-    }
-}
-async function getBrandName(page: Page) {
-    try {
-        let brand = await page.$$eval(brandSelector, mapHrefs);
-        let brandArr=[];
-        brand = brand.map((item) => item.split('/').pop());
-        console.log("BRAND: ",brand);
-        return brand;
-    } catch (e) {
-        console.log(e);
-        return [];
-    }
-}
 
 async function parseCategories(page: Page) {
     try {

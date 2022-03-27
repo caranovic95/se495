@@ -1,4 +1,3 @@
-
 export interface KeywordDBInterface {
     readonly id: number,
     keyword: string,
@@ -7,6 +6,7 @@ export interface KeywordDBInterface {
 
 export interface KeywordProductDBInterface {
     readonly id: number,
+    product_id: number,
     keyword_id: number,
     product_name: string,
     price: number,

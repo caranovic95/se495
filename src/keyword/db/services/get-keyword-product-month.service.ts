@@ -1,20 +1,20 @@
 import Logger from '../../../common/helpers/logger';
-import {Product} from '../models/product.model';
+import {KeywordProduct} from '../models/keyword_product.model';
 import sequelize from "sequelize";
 
-const logger = Logger.get('GET-PRODUCT-BY-MONTH');
+const logger = Logger.get('GET-CATEGORY');
 
-const getProductByMonths = async (input: {
+const getKeywordProductByMonths = async (input: {
     product_id: number
-}): Promise<Product | any> => {
+}): Promise<KeywordProduct | any> => {
     try {
-        const productByMonth = await Product.findAll({
+        const productByMonth = await KeywordProduct.findAll({
             where: {
                 product_id: input.product_id
             },
             attributes: [
                 'id',
-                'title',
+                'product_name',
                 'price',
                 'quantity',
                 'position',
@@ -31,4 +31,4 @@ const getProductByMonths = async (input: {
     }
 };
 
-export default getProductByMonths;
+export default getKeywordProductByMonths;
