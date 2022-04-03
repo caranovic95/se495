@@ -1,5 +1,7 @@
 import Logger from '../../../common/helpers/logger';
 import {KeywordProduct} from '../models/keyword_product.model';
+import {Category} from "../../../category/db/models/category.model";
+import {Keyword} from "../../../common/models";
 
 const logger = Logger.get('GET-KEYWORD-PRODUCT');
 
@@ -10,6 +12,11 @@ const getAllKeywordProducts = async (page) => {
         let limit = 10;
         let products = await KeywordProduct.findAndCountAll({
             where: {active: 1},
+            include: [{
+                model: Keyword,
+                attributes: ['keyword'],
+            }],
+            raw: true,
             limit,
             offset: (offset - 1) * limit,
             group: ['product_name']
@@ -21,7 +28,8 @@ const getAllKeywordProducts = async (page) => {
             "last_page": lastPage
         };
         let data = products.rows;
-
+        data.map((item) => item['keyword'] = item['keyword.keyword'])
+        data.map((item) => delete item['keyword.keyword']);
         return {
             data,
             meta

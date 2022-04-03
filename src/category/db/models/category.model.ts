@@ -5,9 +5,11 @@ import {
     AutoIncrement,
     AllowNull,
     Column,
+    HasMany,
     DataType, Unique, Default,
 } from 'sequelize-typescript';
-import { CategoryDBInterface } from '../interfaces/category.interface';
+import {CategoryDBInterface} from '../interfaces/category.interface';
+import {Product} from "../../../common/models";
 
 @Table({
     name: {
@@ -48,11 +50,11 @@ export class Category extends Model<Partial<CategoryDBInterface>> {
     @Column(DataType.STRING)
     sub_category: string;
 
-
-
+    @HasMany(() => Product)
+    products: Product[];
     static loadScopes = async (): Promise<void> => {
         await Category.addScope('public', {
-            attributes: [ 'shop_name', 'category_url','screenshot','crawled_at','subcategories' ]
+            attributes: ['shop_name', 'category_url', 'screenshot', 'crawled_at', 'subcategories']
         });
     }
 }

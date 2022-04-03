@@ -5,9 +5,11 @@ import {
     AutoIncrement,
     AllowNull,
     Column,
-    DataType, Unique,
+    DataType, Unique, BelongsTo, ForeignKey,
 } from 'sequelize-typescript';
 import {KeywordProductDBInterface} from '../interfaces/keyword.interface';
+import {Category} from "../../../category/db/models/category.model";
+import {Keyword} from "./keyword.model";
 
 @Table({
     name: {
@@ -30,7 +32,8 @@ export class KeywordProduct extends Model<Partial<KeywordProductDBInterface>> {
     product_id: number;
 
     @AllowNull(true)
-    @Column(DataType.STRING)
+    @Column(DataType.INTEGER)
+    @ForeignKey(() => Keyword)
     keyword_id: number;
 
     @AllowNull(true)
@@ -74,9 +77,14 @@ export class KeywordProduct extends Model<Partial<KeywordProductDBInterface>> {
     active: number;
 
 
+    // Associations
+
+    @BelongsTo(() => Keyword)
+    keyword: Keyword;
+
     static loadScopes = async (): Promise<void> => {
         await KeywordProduct.addScope('public', {
-            attributes: ['product_name', 'price', 'product_desc', 'brand', 'quantity', 'availability', 'position', 'image', 'crawled_at', 'active']
+            attributes: ['product_name', 'price', 'product_desc', 'brand', 'quantity', 'availability', 'position', 'image', 'crawled_at', 'active', 'keyword']
         });
     }
 }

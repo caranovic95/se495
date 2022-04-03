@@ -5,9 +5,12 @@ import {
     AutoIncrement,
     AllowNull,
     Column,
-    DataType, Default,
+    DataType, Default, HasMany,
 } from 'sequelize-typescript';
 import {KeywordDBInterface} from '../interfaces/keyword.interface';
+import {Product} from "../../../product/db/models/product.model";
+import {KeywordProduct} from "./keyword_product.model";
+
 
 @Table({
     name: {
@@ -34,6 +37,8 @@ export class Keyword extends Model<Partial<KeywordDBInterface>> {
     @Column(DataType.DATE)
     created_at: Date;
 
+    @HasMany(() => KeywordProduct)
+    keyword_product: KeywordProduct[];
 
     static loadScopes = async (): Promise<void> => {
         await Keyword.addScope('public', {

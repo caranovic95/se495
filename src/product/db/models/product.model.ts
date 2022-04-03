@@ -5,9 +5,12 @@ import {
     AutoIncrement,
     AllowNull,
     Column,
+    ForeignKey,
+    BelongsTo,
     DataType, Unique,
 } from 'sequelize-typescript';
 import {ProductDBInterface} from '../interfaces/product.interface';
+import {Category} from "../../../category/db/models/category.model";
 
 @Table({
     name: {
@@ -26,7 +29,8 @@ export class Product extends Model<Partial<ProductDBInterface>> {
     readonly id: number;
 
     @AllowNull(true)
-    @Column(DataType.STRING)
+    @Column(DataType.INTEGER)
+    @ForeignKey(() => Category)
     category_id: number;
 
     @AllowNull(true)
@@ -65,10 +69,13 @@ export class Product extends Model<Partial<ProductDBInterface>> {
     @Column(DataType.INTEGER)
     active: number;
 
+    @BelongsTo(() => Category)
+    category: Category
+
 
     static loadScopes = async (): Promise<void> => {
         await Product.addScope('public', {
-            attributes: ['product_id', 'title', 'price', 'brand', 'quantity', 'position', 'image', 'crawled_at', 'active']
+            attributes: ['category_id', 'product_id', 'title', 'price', 'brand', 'quantity', 'position', 'image', 'crawled_at', 'active', 'category']
         });
     }
 }
